@@ -4,11 +4,13 @@
 /// Hocus Pocus, a magical build system
 /// 
 /// Use instructions:
-/// 1. Create your buildscript (hocus_pocus.c)
+/// 1. Create your buildscript (hocus.c)
 /// 2. Define "DO_HOCUS_POCUS"
-/// 3. Include "hocus_pocus.h"
+/// 3. Include "hocus.h"
 /// 4. TODO: update as the buildscript grows
-/// 5. Bootstrap by running `cl.exe /out:hocus.exe hocus_pocus.c`
+/// 5. Open the native build tools command line
+/// 6. Bootstrap by running `cl.exe hocus.c`
+/// 7. Run `hocus.exe`, which will automatically rebuild itself and your project!
 ///
 /// Project structure
 /// . 
@@ -55,19 +57,6 @@ int rebuild(char argc, char* argv[]);
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-int rebuild(char argc, char* argv[]) {
-    char const* src = "hocus.c";
-    char const* exe = "hocus.exe";
-    char const* old_exe = "hocus.old.exe";
-
-    if (compare_last_edit(src, exe) < 0) return 0;
-    move(exe, old_exe);
-    build(src, exe);
-    int err = run(argc, argv, exe);
-
-    exit(err);
-}
-
 int compare_last_edit(char const* lhs, char const* rhs) {
     HANDLE hfile;
     hfile = CreateFileA(lhs, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
@@ -89,6 +78,13 @@ int move(char const* src, char const* dst) {
     snprintf(buf, sizeof(buf), "move /y %s %s >NUL 2>&1", src, dst);
     return system(buf);
 }
+
+// int delete(char const* tgt) {
+//     char buf[256];
+
+//     snprintf(buf, sizeof(buf), "del %s", tgt);
+//     return system(buf);
+// }
 
 int build(char const* src, char const* exe) {
     char buf[256];
@@ -115,6 +111,20 @@ int run(char argc, char* argv[], char const* exe) {
     free(command);
     return ret;
 }
+
+int rebuild(char argc, char* argv[]) {
+    char const* src = "hocus.c";
+    char const* exe = "hocus.exe";
+    char const* old_exe = "hocus.old.exe";
+
+    if (compare_last_edit(src, exe) < 0) return 0;
+    move(exe, old_exe);
+    build(src, exe);
+    int err = run(argc, argv, exe);
+
+    exit(err);
+}
+
 #endif//DO_HOCUS_POCUS
 
 #endif//HOCUS_POCUS_H_
