@@ -46,11 +46,14 @@
 #error "Bad custom allocator - Define all of: hp_alloc, hp_realloc, hp_free"
 #endif//allocator checks
 
-int rebuild(char argc, char* argv[]);
+int hocus_pocus(char argc, char* argv[]);
 
 #ifdef DO_HOCUS_POCUS
 // IMPLEMENTATION
 
+#ifndef _WIN32
+#error "Only windows is currently supported!"
+#else
 #include <stdio.h>
 #include <string.h>
 
@@ -112,19 +115,20 @@ int run(char argc, char* argv[], char const* exe) {
     return ret;
 }
 
-int rebuild(char argc, char* argv[]) {
+int hocus_pocus(char argc, char* argv[]) {
     char const* src = "hocus.c";
+    char const* lib = "hocus.h";
     char const* exe = "hocus.exe";
     char const* old_exe = "hocus.old.exe";
 
-    if (compare_last_edit(src, exe) < 0) return 0;
+    if (compare_last_edit(src, exe) < 0
+        && compare_last_edit(lib, exe) < 0) return 0;
     move(exe, old_exe);
     build(src, exe);
     int err = run(argc, argv, exe);
 
     exit(err);
 }
-
+#endif//_WIN32
 #endif//DO_HOCUS_POCUS
-
 #endif//HOCUS_POCUS_H_
