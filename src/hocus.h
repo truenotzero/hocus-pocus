@@ -46,7 +46,26 @@
 #error "Bad custom allocator - Define all of: hp_alloc, hp_realloc, hp_free"
 #endif//allocator checks
 
+typedef char const *_hp_cstr;
+typedef struct {
+    _hp_cstr *elems;
+    int size;
+    int capacity;
+} _hp_sb;
+
+typedef struct _hp_on_src_params {
+    char output_type;
+    char const *target_dir;
+    char const *source_dir;
+    char const *the_binary;
+    int _do_relink;
+    _hp_sb _objects;
+} hocus_build_params;
+
 int hocus_pocus(char argc, char* argv[]);
+int hocus_clean(hocus_build_params *params);
+int hocus_build(hocus_build_params *params);
+int hocus_link(hocus_build_params *params);
 
 typedef int(*_hp_on_src_cb_t)(char const *base, char const* src, void *user_data);
 #endif//HOCUS_POCUS_H_
