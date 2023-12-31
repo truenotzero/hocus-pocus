@@ -339,7 +339,7 @@ int hocus_build(hocus_build_params *params) {
     if (!params->output_type) { params->output_type = 'o'; }
 
     _hp_mkdir(params->target_dir);
-    return _hp_iterate_dir(params->source_dir, ".c", &params, _hp_on_src_recompile_and_mark_link);
+    return _hp_iterate_dir(params->source_dir, ".c", params, _hp_on_src_recompile_and_mark_link);
 }
 
 int hocus_link(hocus_build_params *params) {
