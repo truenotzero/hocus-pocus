@@ -2,10 +2,10 @@
 #include "src/hocus.h"
 #include "src/hocus.c"
 
-typedef char *hp_cstr;
+typedef char const *hp_cstr;
 
 typedef struct {
-    hp_cstr *items;
+    hp_cstr *elems;
     int size;
     int capacity;
 } hp_sb;
@@ -18,15 +18,15 @@ int hp_sb_at_least(hp_sb *self, int desired_capacity) {
 
     while (self->capacity < desired_capacity) { self->capacity *= 2; }
     if (self->capacity != start_capacity) {
-        self->items = hp_realloc(self->items, sizeof(*self->items) * self->capacity);
+        self->elems = hp_realloc((void*) self->elems, sizeof(*self->elems) * self->capacity);
     }
 
-    return self->items ? 0 : 1;
+    return self->elems ? 0 : 1;
 }
 
 int hp_sb_push(hp_sb *self, hp_cstr item) {
     if (hp_sb_at_least(self, self->size + 1) != 0) return 1;
-    self->items[self->size] = item;
+    self->elems[self->size] = item;
     self->size += 1;
     return 0;
 }
@@ -42,6 +42,19 @@ int main(int argc, char *argv[]) {
     // };
 
     // _hp_iterate_dir("src", ".c", &params, _hp_on_src);
+
+    hp_sb sb = {0};
+    hp_sb_push(&sb, "foo");
+    hp_sb_push(&sb, "foo");
+    hp_sb_push(&sb, "foo");
+    hp_sb_push(&sb, "foo");
+    hp_sb_push(&sb, "foo");
+    hp_sb_push(&sb, "bar!!!");
+
+    for (int i = 0; i < sb.size; ++i) {
+        printf("%s ", sb.elems[i]);
+    }
+    printf("\n");
 
     return 0;
 }
