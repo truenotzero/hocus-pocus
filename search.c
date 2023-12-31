@@ -38,26 +38,42 @@ int _hp_iterate_dir(char const *base, char const* ending, void *user_data, _hp_o
     return 0;
 }
 
-int _hp_on_src_compile(char const *base, char const *src, char const *target) {
+struct _hp_on_src_params {
+    char output_type;
+    char const *target_dir;
+    char const *the_binary;
+    int do_relink;
+};
+
+int _hp_on_src(char const *base, char const *src, struct _hp_on_src_params *params) {
     char dest[256];
     printf("src: %s\\%s\n", base, src);
 
     // splice from first \ to the end
     char const *nobase = strchr(base, '\\');
     if (nobase) {
-        snprintf(dest, sizeof(dest), "%s\\%s\\%s", target, nobase+1, src);
+        snprintf(dest, sizeof(dest), "%s\\%s\\%s", params->target_dir, nobase+1, src);
     } else {
-        snprintf(dest, sizeof(dest), "%s\\%s", target, src);
+        snprintf(dest, sizeof(dest), "%s\\%s", params->target_dir, src);
     }
     int len = strlen(dest);
     dest[len - 1] = 'o';
 
     // buf now contains the actual dest
     // check if recompile is needed
-    #if 0
     if (_hp_check_last_edit(src, dest) < 0) {
-        return _hp_compile(src);
+        int ret = 0;// TODO: _hp_compile(src);
+#       error "TODO: _hp_compile(src);"
+        if (ret != 0) { return ret; }
+        params->do_relink = 1; // since we just updated an object we must relink
     }
-    #endif
+
+    // set relink if the source's matching object file was updated by an external tool
+    if (!params->do_relink
+        && _hp_check_last_edit(dest, params->the_binary) < 0) {
+            params->do_relink = 1;
+        }
+    
+#   error "TODO: push_objectfile(&params->objects);"
     return 0;
 }
