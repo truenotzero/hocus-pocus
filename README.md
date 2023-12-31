@@ -42,5 +42,15 @@ int main(int argc, char *argv[]) {
 
 ```
 
+## Features
+### This project isn't finished yet!
+[x] Project bootstrap
+[x] Buildscript rebuilding
+[x] Source auto-recompilation
+[x] Application auto-linking
+[ ] Automatic include directories
+[ ] (Shared) library support
+[ ] Recompile sources on header file change
+
 ## License
 MIT License
