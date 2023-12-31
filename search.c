@@ -37,3 +37,27 @@ int _hp_iterate_dir(char const *base, char const* ending, void *user_data, _hp_o
     FindClose(search);
     return 0;
 }
+
+int _hp_on_src_compile(char const *base, char const *src, char const *target) {
+    char dest[256];
+    printf("src: %s\\%s\n", base, src);
+
+    // splice from first \ to the end
+    char const *nobase = strchr(base, '\\');
+    if (nobase) {
+        snprintf(dest, sizeof(dest), "%s\\%s\\%s", target, nobase+1, src);
+    } else {
+        snprintf(dest, sizeof(dest), "%s\\%s", target, src);
+    }
+    int len = strlen(dest);
+    dest[len - 1] = 'o';
+
+    // buf now contains the actual dest
+    // check if recompile is needed
+    #if 0
+    if (_hp_check_last_edit(src, dest) < 0) {
+        return _hp_compile(src);
+    }
+    #endif
+    return 0;
+}
