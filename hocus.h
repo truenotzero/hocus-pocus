@@ -48,6 +48,8 @@
 
 int hocus_pocus(char argc, char* argv[]);
 
+#endif//HOCUS_POCUS_H_
+
 #ifdef DO_HOCUS_POCUS
 // IMPLEMENTATION
 
@@ -56,11 +58,12 @@ int hocus_pocus(char argc, char* argv[]);
 #else
 #include <stdio.h>
 #include <string.h>
+#include <stdarg.h>
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-int compare_last_edit(char const* lhs, char const* rhs) {
+int _hp_compare_last_edit(char const* lhs, char const* rhs) {
     HANDLE hfile;
     hfile = CreateFileA(lhs, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, NULL);
     FILETIME lhs_file_time = {0};
@@ -75,28 +78,34 @@ int compare_last_edit(char const* lhs, char const* rhs) {
     return CompareFileTime(&lhs_file_time, &rhs_file_time);
 }
 
-int move(char const* src, char const* dst) {
+int _hp_cmd(char const* fmt, ...) {
     char buf[256];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, args);
+    int ret = system(buf);
+    va_end(args);
 
-    snprintf(buf, sizeof(buf), "move /y %s %s >NUL 2>&1", src, dst);
-    return system(buf);
+    return ret;
 }
 
-// int delete(char const* tgt) {
-//     char buf[256];
-
-//     snprintf(buf, sizeof(buf), "del %s", tgt);
-//     return system(buf);
-// }
-
-int build(char const* src, char const* exe) {
-    char buf[256];
-
-    snprintf(buf, sizeof(buf), "cl.exe /Fe:%s %s >NUL 2>&1", exe, src);
-    return system(buf);
+int _hp_move(char const* src, char const* dst) {
+    return _hp_cmd("move /y %s %s >NUL 2>&1", src, dst);
 }
 
-int run(char argc, char* argv[], char const* exe) {
+int _hp_delete(char const* tgt) {
+    return _hp_cmd("del /q %s", tgt);
+}
+
+int _hp_build(char const* src, char const* exe) {
+    return _hp_cmd("cl.exe /Fe:%s %s >NUL 2>&1", exe, src);
+}
+
+int _hp_mkdir(char const* dir) {
+    return _hp_cmd("mkdir %s >NUL 2>&1");
+}
+
+int _hp_run(char argc, char* argv[], char const* exe) {
     int command_len = strlen(exe) + 2;
     for (int i = 1; i < argc; ++i) {
         command_len += strlen(argv[i]);
@@ -121,14 +130,18 @@ int hocus_pocus(char argc, char* argv[]) {
     char const* exe = "hocus.exe";
     char const* old_exe = "hocus.old.exe";
 
-    if (compare_last_edit(src, exe) < 0
-        && compare_last_edit(lib, exe) < 0) return 0;
-    move(exe, old_exe);
-    build(src, exe);
-    int err = run(argc, argv, exe);
+    if (_hp_compare_last_edit(src, exe) < 0
+        && _hp_compare_last_edit(lib, exe) < 0) return 0;
+    
+    _hp_move(exe, old_exe);
+    if(_hp_build(src, exe) != 0) {
+        printf("Build failed!\n");
+        _hp_move(old_exe, exe);
+        exit(1);
+    }
+    int err = _hp_run(argc, argv, exe);
 
     exit(err);
 }
 #endif//_WIN32
 #endif//DO_HOCUS_POCUS
-#endif//HOCUS_POCUS_H_
