@@ -1,4 +1,5 @@
 *
 !hocus.h
-!search.c
+hocus.c
+!src
 !.gitignore
