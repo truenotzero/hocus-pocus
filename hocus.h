@@ -1,3 +1,5 @@
+/*! Auto generated header from dev dir !*/ 
+ 
 #ifndef HOCUS_POCUS_H_
 #define HOCUS_POCUS_H_ "0.1.0"
 
@@ -63,7 +65,6 @@ typedef struct _hp_on_src_params {
 } hocus_build_params;
 
 int hocus_pocus(char argc, char* argv[]);
-
 int hocus_clean(hocus_build_params *params);
 int hocus_build(hocus_build_params *params);
 int hocus_link(hocus_build_params *params);
@@ -72,7 +73,6 @@ typedef int(*_hp_on_src_cb_t)(char const *base, char const* src, void *user_data
 #endif//HOCUS_POCUS_H_
 #ifdef DO_HOCUS_POCUS
 // IMPLEMENTATION
-
 
 #define HP_SB_DEFAULT_CAPACITY 1
 int _hp_sb_at_least(_hp_sb *self, int desired_capacity) {
@@ -307,11 +307,13 @@ int hocus_pocus(char argc, char* argv[]) {
     // and if so, regenerate it
     // (which will automatically trigger recompilation)
 
-    if (_hp_compare_last_edit("src\\hocus.c", lib) > 0
-        && _hp_compare_last_edit("src\\hocus.h", lib) > 0) {
+    if (_hp_compare_last_edit("dev\\hocus.c", lib) > 0
+        || _hp_compare_last_edit("dev\\hocus.h", lib) > 0) {
         printf("Regenerating %s...\n", lib);
-        _hp_cmd("type src\\hocus.h >>%s", lib);
-        _hp_cmd("type src\\hocus.c >>%s", lib);
+        _hp_cmd("echo /*! Auto generated header from dev dir !*/ >%s", lib);
+        _hp_cmd("echo: >>%s", lib);
+        _hp_cmd("type dev\\hocus.h >>%s", lib);
+        _hp_cmd("type dev\\hocus.c >>%s", lib);
     }
 #   endif//HOCUS_DEV
 
@@ -340,7 +342,7 @@ int hocus_build(hocus_build_params *params) {
     if (!params->output_type) { params->output_type = 'o'; }
 
     _hp_mkdir(params->target_dir);
-    return _hp_iterate_dir(params->source_dir, ".c", params, _hp_on_src_recompile_and_mark_link);
+    return _hp_iterate_dir(params->source_dir, ".c", &params, _hp_on_src_recompile_and_mark_link);
 }
 
 int hocus_link(hocus_build_params *params) {

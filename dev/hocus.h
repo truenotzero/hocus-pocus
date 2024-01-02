@@ -1,5 +1,5 @@
 #ifndef HOCUS_POCUS_H_
-#define HOCUS_POCUS_H_
+#define HOCUS_POCUS_H_ "0.1.0"
 
 /// Hocus Pocus, a magical build system
 /// 

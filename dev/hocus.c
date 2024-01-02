@@ -1,7 +1,6 @@
 #ifdef DO_HOCUS_POCUS
 // IMPLEMENTATION
 
-
 #define HP_SB_DEFAULT_CAPACITY 1
 int _hp_sb_at_least(_hp_sb *self, int desired_capacity) {
     int start_capacity = self->capacity;
@@ -235,11 +234,13 @@ int hocus_pocus(char argc, char* argv[]) {
     // and if so, regenerate it
     // (which will automatically trigger recompilation)
 
-    if (_hp_compare_last_edit("src\\hocus.c", lib) > 0
-        && _hp_compare_last_edit("src\\hocus.h", lib) > 0) {
+    if (_hp_compare_last_edit("dev\\hocus.c", lib) > 0
+        || _hp_compare_last_edit("dev\\hocus.h", lib) > 0) {
         printf("Regenerating %s...\n", lib);
-        _hp_cmd("type src\\hocus.h >>%s", lib);
-        _hp_cmd("type src\\hocus.c >>%s", lib);
+        _hp_cmd("echo /*! Auto generated header from dev dir !*/ >%s", lib);
+        _hp_cmd("echo: >>%s", lib);
+        _hp_cmd("type dev\\hocus.h >>%s", lib);
+        _hp_cmd("type dev\\hocus.c >>%s", lib);
     }
 #   endif//HOCUS_DEV
 
