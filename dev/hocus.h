@@ -58,6 +58,8 @@ typedef struct _hp_on_src_params {
     char const *target_dir;
     char const *source_dir;
     char const *the_binary;
+    char const **libs;
+
     int _do_relink;
     _hp_sb _objects;
 } hocus_build_params;

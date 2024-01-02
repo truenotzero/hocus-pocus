@@ -145,7 +145,7 @@ int _hp_expand_path(char const *path, char *buf, int buf_size) {
     return GetFullPathNameA(path, buf_size, buf, NULL);
 }
 
-int _hp_iterate_dir(char const *base, char const* ending, void *user_data, _hp_on_src_cb_t on_src) {
+int _hp_iterate_dir(char const *base, char const* ending, hocus_build_params *params, _hp_on_src_cb_t on_src) {
     char buf[256];
     _hp_expand_path(base, buf, sizeof(buf));
     strncat(buf, "\\*", sizeof(buf));
@@ -160,7 +160,7 @@ int _hp_iterate_dir(char const *base, char const* ending, void *user_data, _hp_o
             int const len = strlen(base) + 1 + strlen(data.cFileName) + 1;
             char *buf = hp_alloc(sizeof(*buf) * len);
             snprintf(buf, len, "%s\\%s", base, data.cFileName);
-            _hp_iterate_dir(buf, ending, user_data, on_src);
+            _hp_iterate_dir(buf, ending, params, on_src);
             hp_free(buf);
         }
 
@@ -168,7 +168,7 @@ int _hp_iterate_dir(char const *base, char const* ending, void *user_data, _hp_o
         int str_len = strlen(data.cFileName);
         int ending_len = strlen(ending);
         if (strcmp(&data.cFileName[str_len - ending_len], ending) == 0) {
-            int on_src_result = on_src(base, data.cFileName, user_data);
+            int on_src_result = on_src(base, data.cFileName, params);
             if (on_src_result != 0) return on_src_result;
         }
     } while (FindNextFileA(search, &data));
@@ -197,8 +197,8 @@ int _hp_on_src_recompile_and_mark_link(char const *base, char const *src, struct
     printf("Checking recompile for: %s\n", path_src);
     if (_hp_file_exists(path_dst) != 0
         || _hp_compare_last_edit(path_src, path_dst) > 0) {
-        int ret = _hp_compile_file(path_src, path_dst);
         printf("Recompiling: %s\n", path_src);
+        int ret = _hp_compile_file(path_src, path_dst);
         if (ret != 0) { return ret; }
         params->_do_relink = 1; // since we just updated an object we must relink
     }
@@ -216,6 +216,7 @@ int _hp_on_src_recompile_and_mark_link(char const *base, char const *src, struct
     int dest_len = strlen(path_dst) + 1;
     char *dyn_dest = hp_alloc(sizeof(*dyn_dest) * dest_len);
     strcpy(dyn_dest, path_dst);
+    strcat(dyn_dest, " ");
     _hp_sb_push(&params->_objects, dyn_dest);
     return 0;
 }
@@ -269,7 +270,7 @@ int hocus_build(hocus_build_params *params) {
     if (!params->output_type) { params->output_type = 'o'; }
 
     _hp_mkdir(params->target_dir);
-    return _hp_iterate_dir(params->source_dir, ".c", &params, _hp_on_src_recompile_and_mark_link);
+    return _hp_iterate_dir(params->source_dir, ".c", params, _hp_on_src_recompile_and_mark_link);
 }
 
 int hocus_link(hocus_build_params *params) {
@@ -281,9 +282,19 @@ int hocus_link(hocus_build_params *params) {
     printf("Relink requested\n");
     char the_binary[256];
     snprintf(the_binary, sizeof(the_binary), "%s\\%s", params->target_dir, params->the_binary);
-    int ret = _hp_link(&params->_objects, the_binary);
 
-    for (int i = 0; i < params->_objects.size; ++i) {
+    int dynamic_size = params->_objects.size;
+
+    if (params->libs) {
+        for (char const **it = params->libs; *it; ++it) {
+            printf("Adding lib: %s\n", *it);
+            _hp_sb_push(&params->_objects, *it);
+            _hp_sb_push(&params->_objects, " ");
+        }
+    }
+
+    int ret = _hp_link(&params->_objects, the_binary);
+    for (int i = 0; i < dynamic_size; ++i) {
         hp_free((void*) params->_objects.elems[i]);
     }
     _hp_sb_free(&params->_objects);
