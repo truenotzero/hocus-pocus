@@ -1,5 +1,5 @@
 #ifndef HOCUS_POCUS_H_
-#define HOCUS_POCUS_H_
+#define HOCUS_POCUS_H_ "0.1.0"
 
 /// Hocus Pocus, a magical build system
 /// 
@@ -63,6 +63,7 @@ typedef struct _hp_on_src_params {
 } hocus_build_params;
 
 int hocus_pocus(char argc, char* argv[]);
+
 int hocus_clean(hocus_build_params *params);
 int hocus_build(hocus_build_params *params);
 int hocus_link(hocus_build_params *params);
