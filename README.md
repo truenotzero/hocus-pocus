@@ -28,9 +28,14 @@ int main(int argc, char *argv[]) {
     hocus_build_params params = {
         // by default, no need to specify:
         // .source_dir = "src",
+        // .include_dir = "include",
         // .target_dir = "target",
         // .output_type = 'o',
         .the_binary = "my_program.exe",
+        .libs = (char const *[]) {
+            "mylib1",
+            "mylib2",
+        },
     };
 
     hocus_clean(&params); // to clean the build
