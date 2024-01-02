@@ -57,6 +57,7 @@ typedef struct _hp_on_src_params {
     char output_type;
     char const *target_dir;
     char const *source_dir;
+    char const *include_dir;
     char const *the_binary;
     char const **libs;
 

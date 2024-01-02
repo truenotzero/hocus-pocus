@@ -98,8 +98,8 @@ int _hp_mkdir(char const *dir) {
         }
 }
 
-int _hp_compile_file(char const *src, char const *obj) {
-    return _hp_cmd("cl.exe /c /Fo:%s %s >NUL 2>&1", obj, src);
+int _hp_compile_file(char const *src, char const *obj, char const *inc) {
+    return _hp_cmd("cl.exe /c /Fo:%s /I %s %s >NUL 2>&1", obj, inc, src);
 }
 
 int _hp_link(_hp_sb *objects, char const *exe) {
@@ -146,6 +146,7 @@ int _hp_expand_path(char const *path, char *buf, int buf_size) {
 }
 
 int _hp_iterate_dir(char const *base, char const* ending, hocus_build_params *params, _hp_on_src_cb_t on_src) {
+    printf("Searching %s\n", base);
     char buf[256];
     _hp_expand_path(base, buf, sizeof(buf));
     strncat(buf, "\\*", sizeof(buf));
@@ -198,7 +199,7 @@ int _hp_on_src_recompile_and_mark_link(char const *base, char const *src, struct
     if (_hp_file_exists(path_dst) != 0
         || _hp_compare_last_edit(path_src, path_dst) > 0) {
         printf("Recompiling: %s\n", path_src);
-        int ret = _hp_compile_file(path_src, path_dst);
+        int ret = _hp_compile_file(path_src, path_dst, params->include_dir);
         if (ret != 0) { return ret; }
         params->_do_relink = 1; // since we just updated an object we must relink
     }
@@ -267,6 +268,7 @@ int hocus_build(hocus_build_params *params) {
     // set defaults
     if (!params->target_dir) { params->target_dir = "target"; }
     if (!params->source_dir) { params->source_dir = "src"; }
+    if (!params->include_dir) { params->include_dir = "include"; }
     if (!params->output_type) { params->output_type = 'o'; }
 
     _hp_mkdir(params->target_dir);
