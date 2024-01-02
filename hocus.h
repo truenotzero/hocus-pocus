@@ -1,7 +1,7 @@
 /*! Auto generated header from dev dir !*/ 
  
 #ifndef HOCUS_POCUS_H_
-#define HOCUS_POCUS_H_ "0.1.0"
+#define HOCUS_POCUS_H_ "0.2.0"
 
 /// Hocus Pocus, a magical build system
 /// 
@@ -336,17 +336,23 @@ int hocus_pocus(char argc, char* argv[]) {
     exit(err);
 }
 
-int hocus_clean(hocus_build_params *params) {
-    return _hp_delete(params->target_dir);
-}
-
-int hocus_build(hocus_build_params *params) {
+int _hocus_build_param_defaults(hocus_build_params *params) {
     // set defaults
     if (!params->target_dir) { params->target_dir = "target"; }
     if (!params->source_dir) { params->source_dir = "src"; }
     if (!params->include_dir) { params->include_dir = "include"; }
     if (!params->output_type) { params->output_type = 'o'; }
 
+    return 0;
+}
+
+int hocus_clean(hocus_build_params *params) {
+    _hocus_build_param_defaults(params);
+    return _hp_delete(params->target_dir);
+}
+
+int hocus_build(hocus_build_params *params) {
+    _hocus_build_param_defaults(params);
     _hp_mkdir(params->target_dir);
     return _hp_iterate_dir(params->source_dir, ".c", params, _hp_on_src_recompile_and_mark_link);
 }

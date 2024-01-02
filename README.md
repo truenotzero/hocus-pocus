@@ -48,8 +48,8 @@ int main(int argc, char *argv[]) {
 [x] Buildscript rebuilding  
 [x] Source auto-recompilation  
 [x] Application auto-linking  
-[ ] Automatic include directories  
-[ ] (Shared) library support  
+[x] Automatic include directories  
+[x] (Shared) library support  
 [ ] Recompile sources on header file change  
 
 ## License
